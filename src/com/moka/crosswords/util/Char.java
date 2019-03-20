@@ -8,7 +8,7 @@ public class Char {
     private char chr;
 
     public Char(char chr, Coords coords) {
-        this.coords = new Coords(coords);
+        this.coords = coords.clone();
         this.chr = chr;
     }
 

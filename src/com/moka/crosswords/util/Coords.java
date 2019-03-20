@@ -1,6 +1,6 @@
 package com.moka.crosswords.util;
 
-public class Coords implements Cloneable {
+public class Coords {
     private int x, y;
 
     public Coords(int x, int y) {
@@ -8,8 +8,8 @@ public class Coords implements Cloneable {
         this.y = y;
     }
 
-    public Coords(Coords original) {
-        this(original.x, original.y);
+    public Coords clone() {
+        return new Coords(x, y);
     }
 
     public int getX() {
@@ -30,6 +30,10 @@ public class Coords implements Cloneable {
 
     public String toString() {
         return x+","+y;
+    }
+
+    public boolean equals(Coords b) {
+        return this.x == b.getX() && this.y == b.getY();
     }
 
 }

@@ -31,7 +31,7 @@ public class Word {
         charList = new ArrayList<>();
 
         /* Clone the object */
-        Coords co = new Coords(coords);
+        Coords co = coords.clone();
 
         /* Iterate through word */
         for(int i = 0; i < word.length(); i++) {
@@ -45,4 +45,7 @@ public class Word {
         }
     }
 
+    public int getOrientation() {
+        return orientation;
+    }
 }

@@ -15,7 +15,18 @@ public class Field {
 
         wordList.add(new Word("baumkuchen", new Coords(100,100), Orientation.DIAG_DOWNLEFT));
 
+        String[] newWords = { "Banana", "Orange", "Cherry", "Apple", "Pineapple", "Melon", "Plum" };
+        for(String word : newWords) {
+            addAtBestLocation(word);
+        }
+
+        //wordList.add(new Word("baumkuchen", new Coords(100,100), Orientation.DIAG_DOWNLEFT));
+
         addAtBestLocation("toastbrot");
+        addAtBestLocation("cater");
+        addAtBestLocation("cater");
+        addAtBestLocation("cater");
+        addAtBestLocation("cater");
 
         printField();
     }
@@ -35,15 +46,20 @@ public class Field {
                 for(Char c : fieldWord.getCharList()) {
                     /* If it matches */
                     if(c.getChr() == chr) {
+
+                        /* Get used orientations of all words at this location */
+                        ArrayList<Integer> usedOrientations = this.getUsedOrientations( this.getWordsAt(c.getCoords()) );
+
                         /* Try all orientations to get match */
                         for(int o = 0; o < 8; o++) {
 
-                            if(chr == 'a') {
-                                boolean b = true;
+                            /* Skip check if any word at this location uses that orientation already */
+                            if(usedOrientations.contains(o) || usedOrientations.contains(Orientation.getCounter(o))) {
+                                continue;
                             }
 
                             /* Get coords of character */
-                            Coords chrCoords = new Coords(c.getCoords());
+                            Coords chrCoords = c.getCoords().clone();
 
                             /* Create new word at this location */
                             /* Since we're "i" chars in, we calculate the start location by going the other way */
@@ -55,9 +71,10 @@ public class Field {
                             /* Get number of matching chars */
                             int matches = countMatches(newWord);
 
+                            /* Update match info if new one is better */
                             if(matches > mostMatches) {
                                 mostMatches = matches;
-                                bestCoords = new Coords(chrCoords);
+                                bestCoords = chrCoords.clone();
                                 bestOrientation = o;
                             }
                         }
@@ -99,13 +116,34 @@ public class Field {
     private Char getCharAt(Coords coords) {
         for(Word w : wordList) {
             for(Char c : w.getCharList()) {
-                if(c.getCoords().getX() == coords.getX() && c.getCoords().getY() == coords.getY()) {
+                if(c.getCoords().equals(coords)) {
                     return c;
                 }
             }
         }
 
         return null;
+    }
+
+    private ArrayList<Word> getWordsAt(Coords coords) {
+        ArrayList<Word> words = new ArrayList<>();
+
+        for(Word w : wordList) {
+            for(Char c : w.getCharList()) {
+                if(c.getCoords().equals(coords)) {
+                    words.add(w);
+                }
+            }
+        }
+        return words;
+    }
+
+    private ArrayList<Integer> getUsedOrientations(ArrayList<Word> words) {
+        ArrayList<Integer> usedOrientations = new ArrayList<>();
+
+        words.forEach((w) -> usedOrientations.add(w.getOrientation()));
+
+        return usedOrientations;
     }
 
     public void printField() {
