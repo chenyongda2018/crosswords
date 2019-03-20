@@ -1,7 +1,5 @@
 package com.moka.crosswords.util;
 
-import com.moka.crosswords.util.Coords;
-
 public class Char {
 
     private Coords coords;

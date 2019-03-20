@@ -2,6 +2,11 @@ package com.moka.crosswords.util;
 
 public class Step {
 
+    /**
+     * Take the given coordinates and "walk" one step in the given orientation
+     * @param coords - Coordinates to start at and modify
+     * @param orientation - Direction to walk at
+     */
     public static void doStep(Coords coords, int orientation) {
 
         int x = coords.getX();
@@ -30,6 +35,12 @@ public class Step {
         coords.setY(y);
     }
 
+    /**
+     * Take the given coordinates and "walk" stepNum steps into the contrary direction
+     * @param coords - Coordinates to start at and modify
+     * @param orientation - Direction of which to walk away from
+     * @param stepNum - Number of steps to walk
+     */
     public static void doCounterSteps(Coords coords, int orientation, int stepNum) {
 
         int counterOrientation = Orientation.getCounter(orientation);

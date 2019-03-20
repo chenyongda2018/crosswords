@@ -13,6 +13,11 @@ public class Crosswords {
     private ArrayList<Word> wordList;
     private int[] allowedOrientations;
 
+    /**
+     * Create a crossword generator.
+     * @param answers - Array of words (answers) to fill the crossword with
+     * @param allowedOrientations - Array of Orientation values that are allowed to be used. See @Orientation
+     */
     public Crosswords(String[] answers, int[] allowedOrientations) {
         this.allowedOrientations = allowedOrientations;
 
@@ -31,6 +36,11 @@ public class Crosswords {
         printField();
     }
 
+    /**
+     * Adds a new word to the field. It finds the place and orientation to the existing words
+     * that yields the most crossings of other words, without overlapping other, existing letters.
+     * @param wordString - Word to add to the field
+     */
     public void addAtBestLocation(String wordString) {
 
         int mostMatches = 0, currentMatches;
@@ -93,23 +103,72 @@ public class Crosswords {
         }
     }
 
+    /**
+     * Count the number of crossings a Word object (which has a location and orientation)
+     * has with the existing field. Exceptions from the rule are
+     * - if characters of other words would be replaced instead of crossed -> return 0
+     * - if other words on the field, which do not cross this word, would touch it (there has to be space between them) -> return 0
+     * @param word - Word object to check against field
+     * @return int - number of crossings the word would have with the field words
+     */
     private int countMatches(Word word) {
+        ArrayList<Word> crossingWords = new ArrayList<>();
         int count = 0;
+
+        /* Go through each char of the new word */
         for(Char c : word.getCharList()) {
             Char fieldChar = getCharAt(c.getCoords());
 
+            /* If there's a char on the possible new chars location already on the field */
             if(fieldChar != null) {
+                /* And it matches the new char? */
                 if((fieldChar.getChr()+"").equalsIgnoreCase(c.getChr()+"")) {
+
+                    /* It's a match! */
                     count++;
+
+                    /* Get all words at this location (without duplicates), for later inspection */
+                    ArrayList<Word> coordWords = getWordsAt(c.getCoords());
+                    for(Word w : coordWords) {
+                        if(!crossingWords.contains(w)) crossingWords.add(w);
+                    }
+
+                /* If it doesn't match, then it's another word. Return. We don't want to replace that character */
                 } else {
-                    /* We dont want to replace an existing character */
                     return 0;
                 }
             }
         }
+
+        /* Check nearest neighbours. Only words crossing the new word are allowed to "touch" it */
+        for(Char c : word.getCharList()) {
+
+            /* Iterate through all directions */
+            for(int ori = 0; ori < 8; ori++) {
+                /* Move one step into each direction */
+                Coords neighCoords = c.getCoords().clone();
+                Step.doStep(neighCoords,ori);
+
+                /* Get words at this neighbour location */
+                ArrayList<Word> neighWords = getWordsAt(neighCoords);
+                for(Word w : neighWords) {
+                    /* If any char on a neighbouring position belongs to a word that doesnt cross this one, quit and return 0 */
+                    if(!crossingWords.contains(w)) {
+                        return 0;
+                    }
+                }
+            }
+        }
+
+        /* Return number of crossings */
         return count;
     }
 
+    /**
+     * Return the Char object of the field at the given location
+     * @param coords - Coordinates of location to check
+     * @return - Char at this location, or null if location is empty
+     */
     private Char getCharAt(Coords coords) {
         for(Word w : wordList) {
             for(Char c : w.getCharList()) {
@@ -122,6 +181,11 @@ public class Crosswords {
         return null;
     }
 
+    /**
+     * Return a list of words that cross the given location
+     * @param coords - Coordinations of location to check
+     * @return - ArrayList<Word> list of words that cross this location
+     */
     private ArrayList<Word> getWordsAt(Coords coords) {
         ArrayList<Word> words = new ArrayList<>();
 
@@ -135,14 +199,22 @@ public class Crosswords {
         return words;
     }
 
+    /**
+     * Return a list of Orientation values used by the given words
+     * @param words - List of words to get Orientations of
+     * @return - List of orientations that the checked words have
+     */
     private ArrayList<Integer> getUsedOrientations(ArrayList<Word> words) {
         ArrayList<Integer> usedOrientations = new ArrayList<>();
-
         words.forEach((w) -> usedOrientations.add(w.getOrientation()));
-
         return usedOrientations;
     }
 
+    /**
+     * Prints out the crossword puzzle.
+     * For this it calculates the boundaries of the field, creates
+     * a 2D array using these boundaries, writes the words to it and then prints it.
+     */
     public void printField() {
         boolean firstSet = true;
         int minX = 0, minY = 0, maxX = 0, maxY = 0;

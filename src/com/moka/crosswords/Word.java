@@ -14,6 +14,12 @@ public class Word {
 
     private ArrayList<Char> charList;
 
+    /**
+     * Create a new Word object
+     * @param word - String reprensation of the word to add
+     * @param startCoords - Starting location where the string starts
+     * @param orientation - Orientation of the string in the field
+     */
     public Word(String word, Coords startCoords, int orientation) {
         this.word = word;
         this.location = startCoords;
@@ -26,7 +32,10 @@ public class Word {
         return charList;
     }
 
-
+    /**
+     * Move the word to a new location
+     * @param coords - New starting location to move word to
+     */
     public void setLocation(Coords coords) {
         charList = new ArrayList<>();
 
