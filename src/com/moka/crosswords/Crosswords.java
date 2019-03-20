@@ -6,27 +6,27 @@ import com.moka.crosswords.util.Orientation;
 import com.moka.crosswords.util.Step;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
-public class Field {
+public class Crosswords {
+
     private ArrayList<Word> wordList;
+    private int[] allowedOrientations;
 
-    public Field() {
-        wordList = new ArrayList<>();
+    public Crosswords(String[] answers, int[] allowedOrientations) {
+        this.allowedOrientations = allowedOrientations;
 
-        wordList.add(new Word("baumkuchen", new Coords(100,100), Orientation.DIAG_DOWNLEFT));
+        if(answers.length > 0 && allowedOrientations.length > 0) {
+            wordList = new ArrayList<>();
+            wordList.add(new Word( answers[0], new Coords(100,100), allowedOrientations[0]));
 
-        String[] newWords = { "Banana", "Orange", "Cherry", "Apple", "Pineapple", "Melon", "Plum" };
-        for(String word : newWords) {
-            addAtBestLocation(word);
+            /* Remove first word from answers array */
+            answers = Arrays.copyOfRange(answers, 1, answers.length);
         }
 
-        //wordList.add(new Word("baumkuchen", new Coords(100,100), Orientation.DIAG_DOWNLEFT));
-
-        addAtBestLocation("toastbrot");
-        addAtBestLocation("cater");
-        addAtBestLocation("cater");
-        addAtBestLocation("cater");
-        addAtBestLocation("cater");
+        for(String answer : answers) {
+            addAtBestLocation(answer);
+        }
 
         printField();
     }
@@ -44,17 +44,18 @@ public class Field {
             /* Go through every char already on the field */
             for(Word fieldWord : wordList) {
                 for(Char c : fieldWord.getCharList()) {
+
                     /* If it matches */
                     if(c.getChr() == chr) {
 
                         /* Get used orientations of all words at this location */
                         ArrayList<Integer> usedOrientations = this.getUsedOrientations( this.getWordsAt(c.getCoords()) );
 
-                        /* Try all orientations to get match */
-                        for(int o = 0; o < 8; o++) {
+                        /* Try all allowed orientations to get match */
+                        for(int ori : allowedOrientations) {
 
                             /* Skip check if any word at this location uses that orientation already */
-                            if(usedOrientations.contains(o) || usedOrientations.contains(Orientation.getCounter(o))) {
+                            if(usedOrientations.contains(ori) || usedOrientations.contains(Orientation.getCounter(ori))) {
                                 continue;
                             }
 
@@ -63,10 +64,10 @@ public class Field {
 
                             /* Create new word at this location */
                             /* Since we're "i" chars in, we calculate the start location by going the other way */
-                            Step.doCounterSteps(chrCoords,o,i);
+                            Step.doCounterSteps(chrCoords,ori,i);
 
-                            /* chrCoords now has the true starting Location */
-                            Word newWord = new Word(wordString, chrCoords, o);
+                            /* chrCoords now has the true starting Location. Test-place word here */
+                            Word newWord = new Word(wordString, chrCoords, ori);
 
                             /* Get number of matching chars */
                             int matches = countMatches(newWord);
@@ -75,7 +76,7 @@ public class Field {
                             if(matches > mostMatches) {
                                 mostMatches = matches;
                                 bestCoords = chrCoords.clone();
-                                bestOrientation = o;
+                                bestOrientation = ori;
                             }
                         }
                     }
@@ -93,7 +94,6 @@ public class Field {
     }
 
     private int countMatches(Word word) {
-
         int count = 0;
         for(Char c : word.getCharList()) {
             Char fieldChar = getCharAt(c.getCoords());
@@ -105,11 +105,8 @@ public class Field {
                     /* We dont want to replace an existing character */
                     return 0;
                 }
-
             }
-
         }
-
         return count;
     }
 
